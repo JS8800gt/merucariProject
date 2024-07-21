@@ -29,8 +29,10 @@ async function getProductInfo(url) {
         await browser.close();
         return { url, name: productName, price };
     } catch (error) {
-        return { url, error: '잘못된 URL입니다.' };
+        console.error(`Error fetching product info for ${url}:`, error); // Improved logging
+        return { url, error: '상품 정보를 가져오는 중 오류가 발생했습니다.' }; // Improved error message
     }
 }
+
 
 module.exports = { getProductInfo };

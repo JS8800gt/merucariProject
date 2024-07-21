@@ -50,30 +50,25 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({urls})
+                body: JSON.stringify({ urls })
             });
-            const data = await response.json();
 
-            if (response.ok) {
-                if (data.products.some(product => product.error === '이미 존재하는 상품입니다.')) {
-                    const confirmation = confirm('이미 존재하는 상품입니다. 정말 추가하시겠습니까?');
-                    if (!confirmation) {
-                        return;
-                    }
-                }
-
-                appendResults(data);
-            } else {
-                console.error('Error response:', data);
-                alert(data.error || '잘못된 URL입니다.');
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+                throw new Error(errorData.error || '서버에서 오류가 발생했습니다.');
             }
+
+            const data = await response.json();
+            appendResults(data);
         } catch (error) {
             console.error('Fetch error:', error);
-            alert('An error occurred while fetching product data.');
+            alert(error.message || '상품 정보를 가져오는 중 오류가 발생했습니다.');
         } finally {
             document.getElementById('loading').style.display = 'none'; // 로딩 바 숨기기
         }
     }
+
 
 
     function appendResults(data) {
