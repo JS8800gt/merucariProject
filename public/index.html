@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akuma WorkShop</title>
+    <link rel="icon" href="/images/logo.svg" type="image/png">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header>
+    <h1></h1>
+</header>
+<div class="container">
+    <h1>메루카리 데이터 추출</h1>
+    <div class="input-group">
+        <input type="text" id="urlsInput" placeholder="URL을 입력하세요."/>
+        <button onclick="fetchProductInfo()">제출</button>
+    </div>
+    <div class="loading" id="loading" style="display: none;">로딩 중...</div>
+    <div class="results" id="resultsContainer"></div>
+</div>
+
+<!-- '맨 위로' 버튼 추가 -->
+<button id="scrollToTopButton" onclick="scrollToTop()">↑</button>
+
+<script>
+    let totalPrice = 0;  // 전체 가격을 추적할 변수
+    let itemCount = 0;   // 상품 순서를 추적할 변수
+
+    // 숫자를 포맷하는 함수
+    function formatNumber(number) {
+        return new Intl.NumberFormat().format(number);
+    }
+
+    async function fetchProductInfo() {
+        const input = document.getElementById('urlsInput').value;
+        const urls = input.split(',').map(url => url.trim()).filter(url => url.length > 0);
+
+        if (urls.length === 0) {
+            alert('Please enter at least one URL.');
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'block'; // 로딩 바 표시
+
+        try {
+            const response = await fetch('/fetch-product-info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({urls})
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.products.some(product => product.error === '이미 존재하는 상품입니다.')) {
+                    const confirmation = confirm('이미 존재하는 상품입니다. 정말 추가하시겠습니까?');
+                    if (!confirmation) {
+                        // 사용자가 취소하면 더 이상의 작업을 하지 않음
+                        return;
+                    }
+                }
+
+                appendResults(data);
+            } else {
+                alert(data.error || '잘못된 URL입니다.');
+            }
+        } catch (error) {
+            alert('An error occurred while fetching product data.');
+        } finally {
+            document.getElementById('loading').style.display = 'none'; // 로딩 바 숨기기
+        }
+    }
+
+    function appendResults(data) {
+        const container = document.getElementById('resultsContainer');
+        let resultsHTML = '';
+
+        if (data.products.length === 0) {
+            resultsHTML += '<p>No products found.</p>';
+        } else {
+            data.products.forEach((product) => {
+                itemCount++; // 상품 순서 증가
+                if (product.error) {
+                    resultsHTML += `<div class="result-item" data-error="true">
+                            <p><span class="label">No. ${itemCount}</span></p>
+                            <p><span class="label">URL:</span> ${product.url}</p>
+                            <p>${product.error}</p>
+                        </div>`;
+                } else {
+                    resultsHTML += `<div class="result-item" data-price="${product.price}">
+                            <div>
+                                <p><span class="label">No. ${itemCount}</span></p>
+                                <p><span class="label">상품명:</span> ${product.name}</p>
+                                <p><span class="label">가격:</span> ${formatNumber(product.price)}엔</p>
+                                <p><span class="label">URL:</span> <a href="${product.url}" target="_blank">${product.url}</a></p>
+                            </div>
+                            <button class="delete-button" onclick="deleteItem(this, ${product.price})">x</button>
+                        </div>`;
+                }
+            });
+
+            totalPrice += data.totalPrice;
+        }
+
+        container.innerHTML += resultsHTML;
+
+        updateTotalPrice();
+    }
+
+    function deleteItem(button, price) {
+        const item = button.parentElement;
+        const container = document.getElementById('resultsContainer');
+
+        container.removeChild(item);
+
+        totalPrice -= parseInt(price, 10);
+
+        // 상품 삭제 후 순서 재정렬
+        reorderItems();
+
+        updateTotalPrice();
+    }
+
+    function reorderItems() {
+        const container = document.getElementById('resultsContainer');
+        const items = Array.from(container.querySelectorAll('.result-item'));
+
+        // 기존의 모든 아이템 제거
+        items.forEach(item => container.removeChild(item));
+
+        // 아이템 순서 재설정
+        items.sort((a, b) => {
+            const aNo = parseInt(a.querySelector('.label').textContent.replace('No. ', ''), 10);
+            const bNo = parseInt(b.querySelector('.label').textContent.replace('No. ', ''), 10);
+            return aNo - bNo;
+        });
+
+        // 순서를 낮은 숫자가 위로 가도록 재정렬
+        itemCount = 0;
+        items.forEach(item => {
+            itemCount++;
+            item.querySelector('.label').textContent = `No. ${itemCount}`;
+            container.appendChild(item);
+        });
+    }
+
+    function updateTotalPrice() {
+        const container = document.getElementById('resultsContainer');
+        const existingTotalPriceElement = document.querySelector('.total-price');
+        if (existingTotalPriceElement) {
+            existingTotalPriceElement.remove();
+        }
+
+        container.innerHTML += `<div class="total-price">총액: ${formatNumber(totalPrice)}엔</div>`;
+    }
+
+    // 스크롤 이벤트를 통해 '맨 위로' 버튼 표시 여부 결정
+    window.addEventListener('scroll', function() {
+        const scrollToTopButton = document.getElementById('scrollToTopButton');
+        if (document.documentElement.scrollTop > 100) { // 스크롤이 100px 이상 내려가면 버튼 표시
+            scrollToTopButton.style.display = 'block';
+        } else {
+            scrollToTopButton.style.display = 'none';
+        }
+    });
+
+    // '맨 위로' 버튼 클릭 시 화면 맨 위로 이동
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.addEventListener('resize', updateDeleteButtonClass);
+    window.addEventListener('load', updateDeleteButtonClass);
+
+    function updateDeleteButtonClass() {
+        const deleteButtons = document.querySelectorAll('.delete-button');
+        const isSmallScreen = window.innerWidth <= 768;
+
+        deleteButtons.forEach(button => {
+            button.classList.toggle('small-screen', isSmallScreen);
+            button.classList.toggle('large-screen', !isSmallScreen);
+        });
+    }
+</script>
+</body>
+</html>

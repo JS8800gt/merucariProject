@@ -1,0 +1,177 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 40px; /* 페이지 여백을 늘림 */
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px; /* 컨테이너의 최대 너비를 늘림 */
+    background: #fff;
+    padding: 30px; /* 패딩을 늘림 */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 효과를 강하게 */
+    box-sizing: border-box;
+}
+
+h1 {
+    margin-bottom: 30px; /* 제목의 하단 여백을 늘림 */
+    font-size: 1.8em; /* 제목의 글자 크기 증가 */
+    text-align: center;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: row;
+    gap: 15px; /* 입력과 버튼 사이의 간격을 늘림 */
+    align-items: center;
+}
+
+input[type="text"] {
+    padding: 15px; /* 입력창의 패딩을 늘림 */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    flex: 1;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 15px; /* 버튼의 패딩을 늘림 */
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.loading {
+    margin-top: 30px; /* 로딩 메시지 상단 여백을 늘림 */
+    text-align: center;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.results {
+    margin-top: 30px; /* 결과 상단 여백을 늘림 */
+    width: 100%;
+}
+
+.result-item {
+    padding: 15px; /* 결과 항목의 패딩을 늘림 */
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center; /* 세로 정렬 */
+    position: relative;
+    flex-wrap: wrap; /* 내용이 줄바꿈되도록 설정 */
+    justify-content: space-between; /* 요소를 양 끝으로 배치 */
+}
+
+.result-item p {
+    margin: 10px 0; /* 결과 항목의 문단 여백을 늘림 */
+    flex: 1; /* p 태그가 가능한 공간을 차지하도록 설정 */
+}
+
+.result-item .label {
+    font-weight: bold;
+}
+
+.delete-button {
+    background: transparent;
+    color: grey;
+    border-radius: 50%;
+    font-size: 1.5em; /* 삭제 버튼의 폰트 크기 증가 */
+    width: 30px; /* 삭제 버튼의 너비를 늘림 */
+    height: 30px; /* 삭제 버튼의 높이를 늘림 */
+    line-height: 30px; /* 삭제 버튼의 줄 높이 증가 */
+    padding: 0; /* 패딩 제거 */
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+/* 큰 화면에서는 상품명 오른쪽에 위치 */
+@media (min-width: 769px) {
+    .delete-button {
+        order: 2; /* 삭제 버튼이 상품명 오른쪽에 오도록 설정 */
+    }
+}
+
+/* 작은 화면에서는 오른쪽 중앙에 위치 */
+@media (max-width: 768px) {
+    .result-item {
+        flex-direction: column; /* 결과 아이템을 세로로 배치 */
+        align-items: flex-start; /* 왼쪽 정렬 */
+        position: relative; /* 절대 위치 지정에 필요한 기준 설정 */
+    }
+
+    .delete-button {
+        position: absolute;
+        top: 50%;
+        right: 15px; /* 오른쪽 여백을 늘림 */
+        transform: translateY(-50%); /* 버튼을 수직 중앙으로 이동 */
+        font-size: 1.2em; /* 삭제 버튼의 폰트 크기 조정 */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 20px; /* 패딩을 줄임 */
+    }
+
+    h1 {
+        font-size: 1.5em; /* 제목의 글자 크기 줄임 */
+    }
+
+    input[type="text"],
+    button {
+        font-size: 1.1em; /* 버튼과 입력창의 글자 크기 조정 */
+    }
+
+    .result-item p {
+        font-size: 1em; /* 결과 항목 문단의 글자 크기 조정 */
+    }
+
+    .delete-button {
+        font-size: 1.1em; /* 삭제 버튼의 폰트 크기 조정 */
+        width: 25px; /* 삭제 버튼의 너비 */
+        height: 25px; /* 삭제 버튼의 높이 */
+        line-height: 25px; /* 삭제 버튼의 줄 높이 */
+    }
+}
+
+/* 삭제 버튼 호버 스타일 */
+.delete-button:hover {
+    background-color: #f0f0f0; /* 옅은 회색 배경 */
+}
+
+.total-price {
+    margin-top: 35px; /* 기존 30px에서 5px 더 추가하여 총액 줄을 5px 아래로 이동 */
+    font-weight: bold;
+}
+
+/* '맨 위로' 버튼 스타일 */
+#scrollToTopButton {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    background-color: lightgray;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);;
+    color: black;
+    border: none;
+    border-radius: 50%;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 25px;
+}
+
