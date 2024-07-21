@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const { getProductInfo } = require('./scraper');
 
 const app = express();
-const port = 8080;
+const port = 3000;
 
 app.use(bodyParser.json());
 app.use(express.static('public'));
