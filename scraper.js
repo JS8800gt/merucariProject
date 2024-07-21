@@ -1,10 +1,16 @@
+// scraper.js 파일
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
+const knownUrls = new Set(); // 중복 URL을 추적하기 위한 집합
 
 async function getProductInfo(url) {
     try {
-        console.log(`Fetching product info for URL: ${url}`);
-        const browser = await puppeteer.launch({ headless: false }); // GUI 활성화
+        // URL이 이미 존재하는지 확인
+        if (knownUrls.has(url)) {
+            return { url, error: '이미 존재하는 상품입니다.' };
+        }
+
+        const browser = await puppeteer.launch({ headless: true });
         const page = await browser.newPage();
 
         await page.setRequestInterception(true);
@@ -16,27 +22,24 @@ async function getProductInfo(url) {
             }
         });
 
-        await page.goto(url, { waitUntil: 'domcontentloaded' });
-        console.log('Page loaded');
+        await page.goto(url, { waitUntil: 'networkidle2' });
 
         const data = await page.content();
         const $ = cheerio.load(data);
 
         const nameDiv = $('div[data-testid="name"] h1');
-        const productName = nameDiv.text().trim() || '상품 이름을 찾을 수 없습니다';
-        console.log(`Product Name: ${productName}`);
+        const productName = nameDiv.text().trim() || 'Product name not found';
 
         const priceDiv = $('div[data-testid="price"]');
-        const price = priceDiv.find('span').last().text().trim().replace(',', '') || '가격을 찾을 수 없습니다';
-        console.log(`Product Price: ${price}`);
+        const price = priceDiv.find('span').last().text().trim().replace(',', '') || 'Price not found';
+
+        knownUrls.add(url); // URL을 집합에 추가
 
         await browser.close();
         return { url, name: productName, price };
     } catch (error) {
-        console.error(`Error getting product info for ${url}:`, error);
-        return { url, error: '상품 정보 가져오기 실패' };
+        return { url, error: '잘못된 URL입니다.' };
     }
 }
-
 
 module.exports = { getProductInfo };
