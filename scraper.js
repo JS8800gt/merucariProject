@@ -1,16 +1,9 @@
-// scraper.js 파일
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-const knownUrls = new Set(); // 중복 URL을 추적하기 위한 집합
 
 async function getProductInfo(url) {
     try {
-        // URL이 이미 존재하는지 확인
-        if (knownUrls.has(url)) {
-            return { url, error: '이미 존재하는 상품입니다.' };
-        }
-
-        const browser = await puppeteer.launch({ headless: true });
+        const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
 
         await page.setRequestInterception(true);
@@ -32,8 +25,6 @@ async function getProductInfo(url) {
 
         const priceDiv = $('div[data-testid="price"]');
         const price = priceDiv.find('span').last().text().trim().replace(',', '') || 'Price not found';
-
-        knownUrls.add(url); // URL을 집합에 추가
 
         await browser.close();
         return { url, name: productName, price };
