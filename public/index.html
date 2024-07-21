@@ -45,7 +45,7 @@
         document.getElementById('loading').style.display = 'block'; // 로딩 바 표시
 
         try {
-            const response = await fetch('', {
+            const response = await fetch('/fetch-product-info', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -58,21 +58,23 @@
                 if (data.products.some(product => product.error === '이미 존재하는 상품입니다.')) {
                     const confirmation = confirm('이미 존재하는 상품입니다. 정말 추가하시겠습니까?');
                     if (!confirmation) {
-                        // 사용자가 취소하면 더 이상의 작업을 하지 않음
                         return;
                     }
                 }
 
                 appendResults(data);
             } else {
+                console.error('Error response:', data);
                 alert(data.error || '잘못된 URL입니다.');
             }
         } catch (error) {
+            console.error('Fetch error:', error);
             alert('An error occurred while fetching product data.');
         } finally {
             document.getElementById('loading').style.display = 'none'; // 로딩 바 숨기기
         }
     }
+
 
     function appendResults(data) {
         const container = document.getElementById('resultsContainer');
