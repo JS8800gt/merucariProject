@@ -3,12 +3,12 @@ const bodyParser = require('body-parser');
 const { getProductInfo } = require('./scraper');
 
 const app = express();
-const port = 8080;
+const port = 3000;
 
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-app.post('/fetch-product-info', async (req, res) => {
+app.post('', async (req, res) => {
     const { urls } = req.body;
 
     if (!Array.isArray(urls) || urls.length === 0) {
