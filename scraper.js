@@ -16,7 +16,7 @@ async function getProductInfo(url) {
             }
         });
 
-        await page.goto(url, { waitUntil: 'networkidle2' });
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
         console.log('Page loaded');
 
         const data = await page.content();
