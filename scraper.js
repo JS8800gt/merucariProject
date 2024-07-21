@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 
 async function getProductInfo(url) {
     try {
-        const browser = await puppeteer.launch({ headless: true });
+        const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
 
         await page.setRequestInterception(true);
